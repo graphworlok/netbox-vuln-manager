@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "netbox-vuln-manager"
+version = "0.1.0"
+description = "NetBox plugin for vulnerability and risk management"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+crowdstrike = ["crowdstrike-falconpy>=1.4"]
+dev = ["pytest", "pytest-django"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["netbox_vuln_manager*"]

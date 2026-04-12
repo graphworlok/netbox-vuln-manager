@@ -1,0 +1,78 @@
+{% extends 'generic/object.html' %}
+{% load helpers %}
+
+{% block title %}Finding: {{ object }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col col-md-6">
+    <div class="card">
+      <h5 class="card-header">Finding</h5>
+      <div class="card-body">
+        <table class="table table-hover attr-table">
+          <tr><th>Vulnerability</th>
+            <td><a href="{{ object.vulnerability.get_absolute_url }}">{{ object.vulnerability }}</a></td></tr>
+          <tr><th>Source</th>
+            <td><a href="{{ object.source.get_absolute_url }}">{{ object.source }}</a></td></tr>
+          <tr><th>Status</th>
+            <td><span class="badge bg-{{ object.get_status_color }}">{{ object.get_status_display }}</span></td></tr>
+          <tr><th>Severity</th>
+            <td><span class="badge bg-{{ object.get_severity_color }}">{{ object.get_severity_display }}</span></td></tr>
+          <tr><th>Asset</th>
+            <td>
+              {% if object.asset %}
+                <a href="{{ object.asset.get_absolute_url }}">{{ object.asset }}</a>
+              {% else %}
+                {{ object.asset_hostname|default:"" }}
+              {% endif %}
+            </td></tr>
+          <tr><th>Asset IP</th><td>{{ object.asset_ip|default:"—" }}</td></tr>
+          <tr><th>External ID</th><td><code>{{ object.external_id|default:"—" }}</code></td></tr>
+          <tr><th>Exploitability</th><td>{{ object.exploitability|default:"—" }}</td></tr>
+          <tr><th>First Seen</th><td>{{ object.first_seen }}</td></tr>
+          <tr><th>Last Seen</th><td>{{ object.last_seen }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    {% if object.remediation %}
+    <div class="card mt-3">
+      <h5 class="card-header">Remediation</h5>
+      <div class="card-body">{{ object.remediation|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+
+    {% if object.notes %}
+    <div class="card mt-3">
+      <h5 class="card-header">Analyst Notes</h5>
+      <div class="card-body">{{ object.notes|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col col-md-6">
+    {% if risk_history %}
+    <div class="card">
+      <h5 class="card-header">Risk Score History</h5>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead><tr><th>Assessed</th><th>Score</th><th>Base</th><th>Temporal</th></tr></thead>
+          <tbody>
+          {% for rs in risk_history %}
+          <tr>
+            <td>{{ rs.assessed_at|date:"Y-m-d H:i" }}</td>
+            <td><strong>{{ rs.calculated_score }}</strong></td>
+            <td>{{ rs.base_score|default:"—" }}</td>
+            <td>{{ rs.temporal_score|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    {% include 'inc/panels/tags.html' %}
+    {% include 'inc/panels/custom_fields.html' %}
+  </div>
+</div>
+{% endblock %}

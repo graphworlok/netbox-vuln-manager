@@ -1,0 +1,90 @@
+{% extends 'generic/object.html' %}
+{% load helpers %}
+
+{% block title %}Source: {{ object.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col col-md-6">
+    <div class="card">
+      <h5 class="card-header">Source Details</h5>
+      <div class="card-body">
+        <table class="table table-hover attr-table">
+          <tr><th>Name</th><td>{{ object.name }}</td></tr>
+          <tr><th>Type</th><td>{{ object.get_source_type_display }}</td></tr>
+          <tr><th>Enabled</th><td>{% if object.enabled %}<span class="text-success">Yes</span>{% else %}<span class="text-danger">No</span>{% endif %}</td></tr>
+          <tr><th>Auto-create Assets</th><td>{% if object.auto_create_assets %}<span class="text-warning">Yes</span>{% else %}No{% endif %}</td></tr>
+          <tr><th>Asset Match Strategy</th><td>{{ object.get_asset_match_strategy_display }}</td></tr>
+          <tr><th>Min Severity</th><td>{{ object.min_severity|default:"All" }}</td></tr>
+          <tr><th>Last Sync</th><td>{{ object.last_sync_at|default:"Never" }}</td></tr>
+          <tr><th>Sync Status</th>
+            <td>{% if object.last_sync_status %}<span class="badge bg-{{ object.get_last_sync_status_color }}">{{ object.get_last_sync_status_display }}</span>{% else %}—{% endif %}</td></tr>
+          <tr><th>Findings</th><td>{{ object.findings.count }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <h5 class="card-header">Configuration
+        <span class="float-end text-muted small">(credentials redacted)</span>
+      </h5>
+      <div class="card-body">
+        <pre class="mb-0"><code>{{ safe_config|pprint }}</code></pre>
+      </div>
+    </div>
+
+    <!-- Manual sync trigger -->
+    <div class="card mt-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <form method="post" action="{% url 'plugins:netbox_vuln_manager:vulnerabilitysource_sync' pk=object.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning"
+            onclick="return confirm('Run a full sync for \'{{ object.name }}\' now?')">
+            <i class="mdi mdi-sync"></i> Sync Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col col-md-6">
+    {% if recent_logs %}
+    <div class="card">
+      <h5 class="card-header">Recent Sync Logs</h5>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead><tr><th>Started</th><th>Status</th><th>Created</th><th>Updated</th><th>Failed</th></tr></thead>
+          <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td>{{ log.started_at|date:"Y-m-d H:i" }}</td>
+            <td><span class="badge bg-{% if log.status == 'success' %}success{% elif log.status == 'failed' %}danger{% else %}warning{% endif %}">{{ log.status }}</span></td>
+            <td>{{ log.records_created }}</td>
+            <td>{{ log.records_updated }}</td>
+            <td>{{ log.records_failed }}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    {% include 'inc/panels/tags.html' %}
+    {% include 'inc/panels/custom_fields.html' %}
+  </div>
+</div>
+
+{% if findings_table.rows %}
+<div class="row mt-4">
+  <div class="col">
+    <div class="card">
+      <h5 class="card-header">Recent Findings ({{ object.findings.count }} total)</h5>
+      <div class="card-body">
+        {% include 'responsive_table.html' with table=findings_table %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
