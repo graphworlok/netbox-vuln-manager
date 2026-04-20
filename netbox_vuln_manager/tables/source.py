@@ -3,6 +3,13 @@ from netbox.tables import NetBoxTable, ChoiceFieldColumn, BooleanColumn, columns
 
 from ..models import VulnerabilitySource
 
+_SYNC_BUTTON = """
+<a href="{% url 'plugins:netbox_vuln_manager:vulnerabilitysource_sync' pk=record.pk %}"
+   class="btn btn-sm btn-warning" title="Sync now">
+  <i class="mdi mdi-sync"></i>
+</a>
+"""
+
 
 class VulnerabilitySourceTable(NetBoxTable):
     name = tables.Column(linkify=True)
@@ -11,7 +18,8 @@ class VulnerabilitySourceTable(NetBoxTable):
     auto_create_assets = BooleanColumn()
     last_sync_status = ChoiceFieldColumn()
     finding_count = tables.Column(verbose_name="Findings", orderable=False)
-    actions = columns.ActionsColumn(actions=("edit", "delete", "sync"))
+    sync = tables.TemplateColumn(template_code=_SYNC_BUTTON, verbose_name="", orderable=False)
+    actions = columns.ActionsColumn(actions=("edit", "delete"))
 
     class Meta(NetBoxTable.Meta):
         model = VulnerabilitySource
@@ -25,6 +33,7 @@ class VulnerabilitySourceTable(NetBoxTable):
             "last_sync_at",
             "last_sync_status",
             "finding_count",
+            "sync",
             "actions",
         )
         default_columns = (
@@ -34,6 +43,7 @@ class VulnerabilitySourceTable(NetBoxTable):
             "last_sync_at",
             "last_sync_status",
             "finding_count",
+            "sync",
             "actions",
         )
 
