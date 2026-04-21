@@ -85,9 +85,9 @@ class VulnerabilityFinding(NetBoxModel):
         verbose_name = "Vulnerability Finding"
         verbose_name_plural = "Vulnerability Findings"
         indexes = [
-            models.Index(fields=["asset_type", "asset_id"]),
-            models.Index(fields=["status", "severity"]),
-            models.Index(fields=["last_seen"]),
+            models.Index(fields=["asset_type", "asset_id"], name="nvmgr_finding_asset_idx"),
+            models.Index(fields=["status", "severity"], name="nvmgr_finding_status_sev_idx"),
+            models.Index(fields=["last_seen"], name="nvmgr_finding_last_seen_idx"),
         ]
 
     def __str__(self):
